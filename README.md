@@ -119,9 +119,7 @@ Bind the vulnerable product tree next to Compose if the YAML mounts a local dire
 
 ## References
 
-- [gitea-user-keys-idor · NVD](https://nvd.nist.gov/vuln/detail/gitea-user-keys-idor)
-- [gitea-user-keys-idor · CVE.org](https://www.cve.org/CVERecord?id=gitea-user-keys-idor)
-- [github.com/go-gitea/gitea](https://github.com/go-gitea/gitea)
+- [github.com/go-gitea/gitea](https://github.com/go-gitea/gitea) tag v1.27.3
 
 - Abraxas Labs: [abraxaslabs.tech](https://abraxaslabs.tech) · [github.com/abraxas](https://github.com/abraxas) · [@abraxas_null](https://x.com/abraxas_null)
 
