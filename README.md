@@ -13,6 +13,10 @@
   &nbsp;·&nbsp;
   <a href="https://github.com/abraxas/gitea-user-keys-idor">gitea-user-keys-idor</a>
 </p>
+<p align="center">
+  Write-up: <a href="https://abraxaslabs.tech/research/gitea-user-keys-idor"><strong>https://abraxaslabs.tech/research/gitea-user-keys-idor</strong></a>
+</p>
+
 
 # gitea-user-keys-idor
 
